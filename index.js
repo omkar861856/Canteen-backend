@@ -9,6 +9,8 @@ import Grid from 'gridfs-stream'
 import path from 'path'
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
+import 'dotenv/config'
+
 
 // Derive the directory name using fileURLToPath and dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -18,6 +20,8 @@ const app = express()
 
 app.use(cors())
 app.use(json())
+
+const PORT = process.env.PORT;
 
 
 // duplex communication establishment
@@ -57,7 +61,7 @@ io.on('connection', (socket) => {
 });
 
 // Connection URL
-const url = "mongodb+srv://Canteen:0WSMJ7WHtTVk1Txj@cluster0.wttchje.mongodb.net/Canteen?retryWrites=true&w=majority&appName=Cluster0"
+const url = process.env.MONGO_URL
 // const client = new MongoClient(url);
 
 
@@ -311,8 +315,6 @@ app.put('/inventory/:itemId', async (req, res) => {
     const { itemId } = req.params;
     const updates = req.body;
 
-    console.log(updates, itemId)
-
     const updatedItem = await Inventory.findOneAndUpdate(
       { itemId },
       { ...updates, updatedAt: new Date().toISOString() },
@@ -419,4 +421,4 @@ app.patch('/inventory/:itemId/quantity', async (req, res) => {
   }
 });
 
-server.listen(3000, console.log("Hello from the server side 3000"))
+server.listen(PORT, console.log("Hello from the server side 3000"))
