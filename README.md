@@ -17,14 +17,14 @@ Ensure that you have the following installed:
    git clone <repository-url>
    cd <repository-directory>
 
-2 **Install Dependencies**
+2. **Install Dependencies**
 
     npm install
 
-3. **Create .env file and add the following variables
+3. **Create .env file and add the following variables**
 
     PORT=3000
     MONGO_URL=mongodb://localhost:27017/myDatabase
 
-4. **Start the server and access the application.
+4. **Start the server and access the application.**
     
