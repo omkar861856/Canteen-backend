@@ -2,6 +2,7 @@ import Router from 'express'
 import { upload } from '../middleware/uploadMiddleware.js';
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
+import Inventory from '../models/Inventory.js'
 
 const router = Router();
 
@@ -108,8 +109,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
   });
   
-  // get all inventory items
-  
+  // get all inventory items  
   // GET 
  router.get('/', async (req, res) => {
     try {
