@@ -7,7 +7,13 @@ const orderSchema = new mongoose.Schema({
   totalPrice: { type: Number, required: true },
   status: { type: String, default: "pending" },
   orderedAt: { type: Date, default: Date.now },
-});
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  totalPreparationTime: {type: Number, required: true},
+  completedAt: {type: Date},
+  razorpayPaymentId: {type: String, required: true}
 
-const Order = mongoose.model("Order", orderSchema);
+}, { collection: "Orders" });
+
+const Order = mongoose.model("Orders", orderSchema);
 export default Order;

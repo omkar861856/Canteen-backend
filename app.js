@@ -2,7 +2,6 @@ import express, { json } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
-import orderRoutes from "./routes/orderRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 import routes from './routes/index.js'
 

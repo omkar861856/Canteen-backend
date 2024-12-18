@@ -31,7 +31,6 @@ router.post("/orders", async (req, res) => {
         res.status(200).send(order);
 
     } catch (error) {
-        console.log("entered error block")
         res.status(200).send({ error, msg: "entered error block" })
     }
 })
@@ -75,7 +74,6 @@ router.post("/success", async (req, res) => {
             paymentId: razorpayPaymentId,
         })
     } catch (error) {
-        console.log("Error")
         res.status(200).send(error)
     }
 })

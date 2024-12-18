@@ -3,6 +3,7 @@ import { upload } from '../middleware/uploadMiddleware.js';
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import Inventory from '../models/Inventory.js'
+import path from 'path';
 
 const router = Router();
 
@@ -10,8 +11,9 @@ const router = Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
 // routes
+
+// router.use('/images', express.static(path.join(__dirname, 'images')));
 
 // create inventory item
 
@@ -30,8 +32,6 @@ router.post('/', upload.single('image'), async (req, res) => {
       updatedAt: new Date().toISOString(),
       preparationTime,
     });
-  
-    console.log(newItem)
   
     try {
       await newItem.save();
@@ -53,9 +53,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
   
     // Resolve the absolute path to the image
-    const imagePath = `${__dirname}/${item.image}`;
-    console.log(imagePath)
-  
+    const imagePath = path.join(__dirname, '..', item.image);  
     // Send the image as a file from the server
     res.sendFile(imagePath, (err) => {
       if (err) {
@@ -113,14 +111,14 @@ router.post('/', upload.single('image'), async (req, res) => {
   // GET 
  router.get('/', async (req, res) => {
     try {
-      console.log("Fetching inventory items")
       const items = await Inventory.find();
       // Add base URL to image paths so they can be accessed from the frontend
       // Map items to include the image path for the frontend
       const updatedItems = items.map(item => ({
         ...item.toObject(),
-        imageUrl: `images/${item.image}`,  // Relative URL for the image
+        imageUrl: `${item.image}`,  // Relative URL for the image
       }));
+
   
       res.status(200).json({ updatedItems });
     } catch (error) {

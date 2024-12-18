@@ -24,17 +24,15 @@ router.post('/', async (req, res) => {
     const { id } = req.params;
     const { status } = req.body; // Expected status: 'Completed' or 'Cancelled'
   
-    console.log(id, status)
   
     try {
       const order = await Order.findOneAndUpdate(
         { orderId: id },      // Search for the document by orderId
-        { status },           // Update the status field
+        { status, completedAt: new Date().toISOString() },           // Update the status field
         { new: true }         // Return the updated document
       ); if (!order) return res.status(404).json({ message: "Order not found" });
       res.status(200).json({ message: "Order updated successfully", order });
     } catch (err) {
-      console.log(err)
       res.status(400).json({ error: err.message });
     }
   });
@@ -56,7 +54,6 @@ router.post('/', async (req, res) => {
   router.get('/', async (req, res) => {
     try {
       const orders = await Order.find();
-      console.log(orders)
       res.status(200).json(orders);
     } catch (err) {
       res.status(400).json({ error: err.message });
@@ -68,7 +65,7 @@ router.post('/', async (req, res) => {
   router.get('/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
-      const orders = await Order.find({ userId: userId });
+      const orders = await Order.find({ userId });
       res.status(200).json(orders);
     } catch (err) {
       res.status(400).json({ error: err.message });
