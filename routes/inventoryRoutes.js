@@ -118,9 +118,8 @@ router.post('/', upload.single('image'), async (req, res) => {
         ...item.toObject(),
         imageUrl: `${item.image}`,  // Relative URL for the image
       }));
-
   
-      res.status(200).json({ updatedItems });
+      res.status(200).json(updatedItems);
     } catch (error) {
       res.status(500).json({ error: 'Error fetching inventory items', details: error.message });
     }
