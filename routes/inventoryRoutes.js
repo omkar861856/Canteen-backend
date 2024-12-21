@@ -1,21 +1,14 @@
 import Router from 'express'
-import { upload } from '../middleware/uploadMiddleware.js';
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import Inventory from '../models/Inventory.js'
 import path from 'path';
-
+import { upload } from '../middleware/uploadImageMiddleware.js';
 const router = Router();
 
 // Derive the directory name using fileURLToPath and dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// routes
-
-// router.use('/images', express.static(path.join(__dirname, 'images')));
-
-// create inventory item
 
 router.post('/', upload.single('image'), async (req, res) => {
     const { name, category, price, quantityAvailable, createdAt, itemId, availability, preparationTime } = req.body;
