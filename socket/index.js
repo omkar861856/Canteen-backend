@@ -1,5 +1,7 @@
 import { Server } from 'socket.io';
 
+const users = new Map(); // To store users and their socket IDs
+
 export const initializeSocket = (server) => {
   const io = new Server(server, {
     cors: {
@@ -12,7 +14,11 @@ export const initializeSocket = (server) => {
 
 
   io.on("connection", (socket) => {
-    console.log(`Client connected: ${socket.id}`);
+      // Listen for a user to register with a unique ID
+  socket.on("register", (userId) => {
+    users.set(userId, socket.id); // Map the userId to the socket ID
+    console.log(`User registered: ${userId} with socket ID: ${socket.id}`);
+  });
 
     // Emit notifications to specific rooms or globally
     const sendNotification = (room, data) => {

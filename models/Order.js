@@ -16,8 +16,8 @@ const orderSchema = new mongoose.Schema({
   completedAt: {type: Date},
   razorpayPaymentId: {type: String, required: true},
   cabinName: {type: String, required: true},
-  extraInfo: {type: String, required: true},
-  specialInstructions: {type: String, required: true}
+  extraInfo: {type: String},
+  specialInstructions: {type: String}
 
 }, { collection: "Orders" });
 

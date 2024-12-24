@@ -16,4 +16,4 @@ router.use('/razorpay', razorpayRoutes)
 router.use('/generalfeedback', generalFeedbackRoutes)
 
 
-export default router;
+export default router; 
