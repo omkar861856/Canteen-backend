@@ -9,6 +9,8 @@ const fast2sms_auth = process.env.FAST2SMS_AUTH;
 
 const jwt_secret = process.env.JWT_SECRET;
 
+console.log(fast2sms_auth, jwt_secret)
+
 // Generate and send OTP
 router.post('/signin/send-otp', async (req, res) => {
     const { phone } = req.body;
