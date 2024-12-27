@@ -40,7 +40,6 @@ router.post('/', async (req, res) => {
   // Delete Order (for Cancellation)
   router.delete('/:id', async (req, res) => {
     const { id } = req.params;
-  
     try {
       const order = await Order.findByIdAndDelete(id);
       if (!order) return res.status(404).json({ message: "Order not found" });
@@ -60,12 +59,12 @@ router.post('/', async (req, res) => {
     }
   });
   
-  // Get All Orders by UserId
+  // Get All Orders by Phone
   
-  router.get('/:userId', async (req, res) => {
-    const { userId } = req.params;
+  router.get('/:phone', async (req, res) => {
+    const { phone } = req.params;
     try {
-      const orders = await Order.find({ userId });
+      const orders = await Order.find({ userPhoneNumber:phone });
       res.status(200).json(orders);
     } catch (err) {
       res.status(400).json({ error: err.message });

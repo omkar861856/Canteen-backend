@@ -11,13 +11,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 router.post('/', upload.single('image'), async (req, res) => {
-    const { name, category, price, quantityAvailable, createdAt, itemId, availability, preparationTime } = req.body;
+    const { name, category, price, createdAt, itemId, availability, preparationTime } = req.body;
     const imagePath = req.file ? `/images/${req.file.filename}` : null;  // Store image path
     const newItem = new Inventory({
       name,
       category,
       price: Number(price),
-      quantityAvailable: Number(quantityAvailable),
       image: imagePath,
       createdAt: new Date(createdAt),
       itemId,
@@ -137,38 +136,6 @@ router.post('/', upload.single('image'), async (req, res) => {
   });
   
   
-  // add or reduce inventory
-  
-  // PATCH /:itemId/quantity
- router.patch('/:itemId/quantity', async (req, res) => {
-    try {
-      const { itemId } = req.params;
-      const { quantityChange } = req.body; // `quantityChange` can be positive (add) or negative (reduce)
-  
-      const item = await Inventory.findOne({ itemId });
-  
-      if (!item) {
-        return res.status(404).json({ error: 'Inventory item not found' });
-      }
-  
-      const updatedQuantity = item.quantityAvailable + quantityChange;
-  
-      if (updatedQuantity < 0) {
-        return res.status(400).json({ error: 'Insufficient inventory quantity' });
-      }
-  
-      item.quantityAvailable = updatedQuantity;
-      item.availability = updatedQuantity > 0;
-      item.updatedAt = new Date().toISOString();
-  
-      await item.save();
-  
-      res.status(200).json({ message: 'Inventory quantity updated successfully', item });
-    } catch (error) {
-      res.status(500).json({ error: 'Error updating inventory quantity', details: error.message });
-    }
-  });
-
 
 
 

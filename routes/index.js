@@ -5,6 +5,7 @@ import ordersRoutes from './orderRoutes.js'
 import paymentsRoutes from './paymentRoutes.js'
 import razorpayRoutes from './razorpayRoutes.js'
 import generalFeedbackRoutes from './generalFeedbackRoutes.js'
+import authRoutes from './authRoutes.js'
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.use('/orders', ordersRoutes)
 router.use('/payments', paymentsRoutes)
 router.use('/razorpay', razorpayRoutes)
 router.use('/generalfeedback', generalFeedbackRoutes)
+router.use('/auth', authRoutes)
 
 
-export default router; 
+export default router;     
