@@ -12,7 +12,8 @@ const UserSchema = new mongoose.Schema({
     isRegistered: {type: Boolean, required: true},
     isKitchen: {type: Boolean},
     kitchenId: {type: String},
-    kitchenName: {type: String}
+    kitchenName: {type: String},
+    isKitchenOnline: {type: Boolean}
 }, { collection: "Users" });
 
 export const User = mongoose.model('User', UserSchema); 

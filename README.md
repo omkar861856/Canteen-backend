@@ -21,10 +21,23 @@ Ensure that you have the following installed:
 
     npm install
 
-3. **Create .env file and add the following variables**
+3. **Create .env file and add the variables mentioned in .env.example**
 
-    PORT=3000
-    MONGO_URL=mongodb://localhost:27017/myDatabase
+    RAZORPAY and FAST2SMS related variables need to be acquired from their respective platforms.
 
 4. **Start the server and access the application.**
     
+    npm run dev
+
+## After starting the server - hit on -  http://localhost:3000/api/v1/api-docs for API docs
+
+## Project Title: Canteen WebApp
+
+## Description
+    
+    A goal to digitise Central and State government office's internal canteens.
+
+## Contributing 
+
+    Project is open source, may be closed later on.
+

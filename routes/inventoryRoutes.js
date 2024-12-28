@@ -10,6 +10,49 @@ const router = Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+/**
+ * @swagger
+ * /api/v1/inventory/:
+ *   post:
+ *     summary: Create a new inventory item
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Pizza"
+ *               category:
+ *                 type: string
+ *                 example: "Food"
+ *               price:
+ *                 type: number
+ *                 example: 9.99
+ *               createdAt:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2024-12-28T12:00:00Z"
+ *               itemId:
+ *                 type: string
+ *                 example: "item123"
+ *               availability:
+ *                 type: string
+ *                 example: "true"
+ *               preparationTime:
+ *                 type: string
+ *                 example: "15 minutes"
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Item created successfully.
+ *       500:
+ *         description: Error saving item to the database.
+ */
 router.post('/', upload.single('image'), async (req, res) => {
     const { name, category, price, createdAt, itemId, availability, preparationTime } = req.body;
     const imagePath = req.file ? `/images/${req.file.filename}` : null;  // Store image path
@@ -34,6 +77,26 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
   })
   
+  /**
+ * @swagger
+ * /api/v1/inventory/{itemId}:
+ *   get:
+ *     summary: Get an inventory item and its image
+ *     parameters:
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Image of the specified inventory item.
+ *       404:
+ *         description: Item or image not found.
+ *       500:
+ *         description: Error serving image.
+ */
+
  router.get('/:itemId', async (req, res) => {
     const { itemId } = req.params;
   
@@ -55,9 +118,45 @@ router.post('/', upload.single('image'), async (req, res) => {
     });
   });
   
-  
-  // update inventory item 
-  
+
+  /**
+ * @swagger
+ * /api/v1/inventory/{itemId}:
+ *   put:
+ *     summary: Update an inventory item
+ *     parameters:
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               availability:
+ *                 type: boolean
+ *               preparationTime:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Inventory item updated successfully.
+ *       404:
+ *         description: Inventory item not found.
+ *       500:
+ *         description: Error updating inventory item.
+ */
+
+    
   // PUT /:itemId
  router.put('/:itemId', async (req, res) => {
     try {
@@ -80,7 +179,28 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
   });
   
-  // delete inventory
+
+
+  /**
+ * @swagger
+ * /api/v1/inventory/{itemId}:
+ *   delete:
+ *     summary: Delete an inventory item
+ *     parameters:
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Inventory item deleted successfully.
+ *       404:
+ *         description: Inventory item not found.
+ *       500:
+ *         description: Error deleting inventory item.
+ */
+
   
   // DELETE /:itemId
  router.delete('/:itemId', async (req, res) => {
@@ -98,6 +218,24 @@ router.post('/', upload.single('image'), async (req, res) => {
       res.status(500).json({ error: 'Error deleting inventory item', details: error.message });
     }
   });
+
+  /**
+ * @swagger
+ * /api/v1/inventory/:
+ *   get:
+ *     summary: Get all inventory items
+ *     responses:
+ *       200:
+ *         description: A list of inventory items.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Inventory'
+ *       500:
+ *         description: Error fetching inventory items.
+ */
   
   // get all inventory items  
   // GET 
@@ -116,7 +254,26 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
   });
   
-  // get specific inventory with itemId
+
+  /**
+ * @swagger
+ * /api/v1/inventory/{itemId}:
+ *   get:
+ *     summary: Get a specific inventory item
+ *     parameters:
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Inventory item found.
+ *       404:
+ *         description: Inventory item not found.
+ *       500:
+ *         description: Error fetching inventory item.
+ */
   
   // GET /:itemId  
  router.get('/:itemId', async (req, res) => {
@@ -135,7 +292,35 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
   });
   
-  
+  /**
+ * @swagger
+ * inventorycomponents:
+ *   schemas:
+ *     Inventory:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         category:
+ *           type: string
+ *         price:
+ *           type: number
+ *         image:
+ *           type: string
+ *           description: URL of the item's image
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *         itemId:
+ *           type: string
+ *         availability:
+ *           type: boolean
+ *         preparationTime:
+ *           type: string
+ */
 
 
 

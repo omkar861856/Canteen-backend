@@ -3,6 +3,45 @@ import GeneralFeedback from "../models/GeneralFeedback.js";
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /api/v1/generalfeedback/:
+ *   post:
+ *     summary: Submit a new feedback
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               feedback:
+ *                 type: string
+ *                 example: "The service was excellent!"
+ *               rating:
+ *                 type: integer
+ *                 example: 5
+ *               fullName:
+ *                 type: string
+ *                 example: "John Doe"
+ *     responses:
+ *       201:
+ *         description: Feedback submitted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 feedback:
+ *                   $ref: '#/components/schemas/Feedback'
+ *       400:
+ *         description: All fields are required.
+ *       500:
+ *         description: Failed to save feedback.
+ */
+
 // Create feedback
 router.post("/", async (req, res) => {
   const { feedback, rating, fullName } = req.body;
@@ -21,6 +60,25 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Failed to save feedback" });
   }
 });
+ 
+
+/**
+ * @swagger
+ * /api/v1/generalfeedback/:
+ *   get:
+ *     summary: Retrieve all feedbacks
+ *     responses:
+ *       200:
+ *         description: A list of feedbacks.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Feedback'
+ *       500:
+ *         description: Failed to fetch feedbacks.
+ */
 
 // Get all feedbacks
 router.get("/", async (req, res) => {
@@ -32,6 +90,33 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch feedbacks" });
   }
 });
+
+/**
+ * @swagger
+ * /api/v1/generalfeedback/{fullName}:
+ *   get:
+ *     summary: Retrieve feedback by fullName
+ *     parameters:
+ *       - in: path
+ *         name: fullName
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "John Doe"
+ *     responses:
+ *       200:
+ *         description: Feedbacks for the specified user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Feedback'
+ *       404:
+ *         description: No feedback found for this user.
+ *       500:
+ *         description: Failed to fetch feedback.
+ */
 
 // Get feedback by fullName
 router.get("/:fullName", async (req, res) => {
@@ -49,5 +134,26 @@ router.get("/:fullName", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch feedback" });
   }
 });
+
+/**
+ * @swagger
+ * generalfeedbackcomponents:
+ *   schemas:
+ *     Feedback:
+ *       type: object
+ *       properties:
+ *         feedback:
+ *           type: string
+ *         rating:
+ *           type: integer
+ *         fullName:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
 
 export default router;

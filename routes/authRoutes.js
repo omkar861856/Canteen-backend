@@ -9,7 +9,32 @@ const fast2sms_auth = process.env.FAST2SMS_AUTH;
 
 const jwt_secret = process.env.JWT_SECRET;
 
-console.log(fast2sms_auth, jwt_secret)
+
+/**
+ * @swagger
+ * /api/v1/auth/signin/send-otp:
+ *   post:
+ *     summary: Generate and send OTP for login
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phone:
+ *                 type: string
+ *                 example: "1234567890"
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully.
+ *       404:
+ *         description: No user found.
+ *       403:
+ *         description: User already has an active login.
+ *       500:
+ *         description: Internal server error.
+ */
 
 // Generate and send OTP
 router.post('/signin/send-otp', async (req, res) => {
@@ -57,7 +82,6 @@ router.post('/signin/send-otp', async (req, res) => {
 
                 }
             } else {
-                console.log("Decoded Payload:", decoded);
                 // login
                 user.isLoggedIn = true;
                 await user.save()
@@ -70,6 +94,39 @@ router.post('/signin/send-otp', async (req, res) => {
     }
 });
 
+
+/**
+ * @swagger
+ * /api/v1/auth/signup/send-otp:
+ *   post:
+ *     summary: Generate and send OTP for signup
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               isKitchen:
+ *                 type: boolean
+ *               kitchenId:
+ *                 type: string
+ *               kitchenName:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully.
+ *       409:
+ *         description: User with this phone number exists.
+ *       500:
+ *         description: Internal server error.
+ */
 
 router.post('/signup/send-otp', async (req, res) => {
     const { firstName, lastName, phone, isKitchen, kitchenId, kitchenName } = req.body;
@@ -96,7 +153,8 @@ router.post('/signup/send-otp', async (req, res) => {
         isRegistered: false,
         isKitchen, 
         kitchenId, 
-        kitchenName
+        kitchenName,
+        isKitchenOnline: false,
     });
 
     await user.save();
@@ -108,6 +166,33 @@ router.post('/signup/send-otp', async (req, res) => {
         res.status(500).send('Failed to send OTP.');
     }
 })
+
+/**
+ * @swagger
+ * /api/v1/auth/verify-otp:
+ *   post:
+ *     summary: Verify OTP and complete user login or registration
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phone:
+ *                 type: string
+ *                 example: "1234567890"
+ *               otp:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: User verified successfully.
+ *       400:
+ *         description: Invalid or expired OTP.
+ *       500:
+ *         description: Internal server error.
+ */
 
 // Verify OTP
 router.post('/verify-otp', async (req, res) => {
@@ -136,6 +221,29 @@ router.post('/verify-otp', async (req, res) => {
     }
 });
 
+
+/**
+ * @swagger
+ * /api/v1/auth/logout:
+ *   post:
+ *     summary: Logout the user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phone:
+ *                 type: string
+ *                 example: "1234567890"
+ *     responses:
+ *       200:
+ *         description: User logged out successfully.
+ *       500:
+ *         description: Internal server error.
+ */
+
 router.post("/logout", async (req, res) => {
     const { phone } = req.body;
     const user = await User.findOne({ phone })
@@ -151,6 +259,29 @@ router.post("/logout", async (req, res) => {
 
     }
 })
+
+
+/**
+ * @swagger
+ * /api/v1/auth/resend-otp:
+ *   post:
+ *     summary: Resend OTP to the user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phone:
+ *                 type: string
+ *                 example: "1234567890"
+ *     responses:
+ *       201:
+ *         description: New OTP sent.
+ *       500:
+ *         description: Internal server error.
+ */
 
 router.post('/resend-otp', async (req, res) => {
 
@@ -170,6 +301,26 @@ router.post('/resend-otp', async (req, res) => {
 
 })
 
+
+/**
+ * @swagger
+ * /api/v1/auth/user:
+ *   get:
+ *     summary: Get user information from JWT
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: Bearer <JWT token>
+ *     responses:
+ *       200:
+ *         description: User information retrieved successfully.
+ *       401:
+ *         description: Unauthorized or invalid token.
+ */
+
 // Get user info
 router.get('/user', (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
@@ -184,7 +335,82 @@ router.get('/user', (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/v1/auth/update-kitchen-status:
+ *   post:
+ *     summary: Update the status of the kitchen
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               kitchenId:
+ *                 type: string
+ *               status:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Kitchen status updated successfully.
+ *       404:
+ *         description: User not found.
+ *       500:
+ *         description: Internal server error.
+ */
 
+// set kitchen status 
+router.post('/update-kitchen-status', async (req,res)=>{
+    try {
+        const {kitchenId, status} = req.body;
+        console.log({kitchenId, status})
+        const user = await User.findOne({ kitchenId });
+        if(!user){
+            return res.status(404).send({message:"User not found"})
+        }
+        user.isKitchenOnline = status
+        await user.save()
+        res.status(200).send({message: "Kitchen status updated", status: user.isKitchenOnline})
+    } catch (error) {
+        res.status(500).send({message: "Internal server error"}) 
+    }
+})
+
+/**
+ * @swagger
+ * /api/v1/auth/kitchen-status/{kitchenId}:
+ *   get:
+ *     summary: Get the status of a specific kitchen
+ *     parameters:
+ *       - in: path
+ *         name: kitchenId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Kitchen status retrieved successfully.
+ *       404:
+ *         description: User not found.
+ *       500:
+ *         description: Internal server error.
+ */
+
+// get kitchen status 
+
+router.get("/kitchen-status/:kitchenId", async (req,res)=>{
+    try {
+        const {kitchenId} = req.params;
+        const user = await User.findOne({ kitchenId });
+        if(!user){
+            return res.status(404).send({message:"User not found"})
+        }
+        res.status(200).send({message: "Kitchen status updated", status: user.isKitchenOnline, kitchenNumber: user.phone})
+    } catch (error) {
+        res.status(500).send({message: "Internal server error"})  
+    }
+})
 
 
 export default router;
