@@ -34,6 +34,18 @@ const router = Router();
     }
   });
 
+
+  router.get('/:orderId', async (req, res) => {
+    const {orderId} = req.params;
+    try {
+      const payments = await Payment.findOne({order_id:orderId});
+      console.log(payments)
+      res.status(200).json(payments);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   /**
  * @swagger
  * /api/v1/payments/:

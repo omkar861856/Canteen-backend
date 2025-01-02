@@ -194,8 +194,8 @@ router.get('/:phone/:kitchenId', async (req, res) => {
   // Find orders matching both userPhoneNumber and kitchenId
   const orders = await Order.find({
     userPhoneNumber: phone,
-    kitchenId: kitchenId,
-  });    res.status(200).json(orders);
+  });    
+  res.status(200).json(orders);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -267,5 +267,10 @@ router.get('/:id', async (req, res) => {
  */
 
 
+// const changeStream = Order.watch()
+
+// changeStream.on('change', (change)=>{
+//   console.log('Change detected', change)
+// })
 
 export default router;

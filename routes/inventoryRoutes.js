@@ -242,12 +242,10 @@ router.post('/', upload.single('image'), async (req, res) => {
   // GET 
   router.post('/kitchen', async (req, res) => {
     const { kitchenId } = req.body;
-    console.log("Kitchen id:", kitchenId);
     
     try {
       // Query the database for items matching the kitchenId
       const items = await Inventory.find({ kitchenId });
-      console.log("Fetched items:", items);
       
       // Add base URL to image paths so they can be accessed from the frontend
       const updatedItems = items.map(item => ({
@@ -299,6 +297,12 @@ router.post('/', upload.single('image'), async (req, res) => {
       res.status(500).json({ error: 'Error fetching inventory item', details: error.message });
     }
   });
+
+  // const changeStream = Inventory.watch()
+
+  // changeStream.on('change', (change)=>{
+  //   console.log('Change detected', change)
+  // })
   
 /**
  * @swagger

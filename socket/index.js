@@ -4,7 +4,7 @@ import webPush from 'web-push'
 
 export const vapidKeys = webPush.generateVAPIDKeys();
 
-webPush.setVapidDetails(
+export const webNotifications = webPush.setVapidDetails(
   'mailto:omkar861856@gmail.com',
   `${vapidKeys.publicKey}`,
   `${vapidKeys.privateKey}`
@@ -111,36 +111,13 @@ export const initializeSocket = (server) => {
     console.log('Kitchen connected:', socket.id);
 
       // Send a personalized message to the connected client
-      socket.emit('welcomeMessage', {message:`Hello kitchen ${socket.id}, welcome to the server!`, vapiPublicKey: vapidKeys.publicKey});
+      socket.emit('welcomeMessage', {message:`Hello kitchen ${socket.id}, welcome to the server!`});
 
       // Listen for a new message sent by the kitchen
-  socket.on('messageFromKitchen', (messageData) => {
+    socket.on('messageFromKitchen', (messageData) => {
+
     console.log('Message received from kitchen:', messageData);
-    
-    const pushSubscription = {
-      endpoint: messageData.endpoint,
-      keys: {
-        p256dh: messageData.p256dh,
-        auth: messageData.auth
-      }
-    };
-    
-    const payload = JSON.stringify({
-      title: 'Hello!',
-      body: 'This is a test notification!',
-      icon: '/icon.png', // Path to your notification icon
-      badge: '/badge.png' // Path to your notification badge
-    });
-    
-    webPush.sendNotification(pushSubscription, payload)
-      .then((response) => {
-        console.log('Notification sent:', 
-          "this is spartacus"
-        );
-      })
-      .catch((error) => {
-        console.error('Error sending notification:', error);
-      });
+
 
     // Optionally, acknowledge receipt back to the kitchen
     socket.emit('messageAcknowledged', { status: 'received', messageData });
@@ -148,27 +125,27 @@ export const initializeSocket = (server) => {
 
   
     // Notify all users of a new menu item
-    socket.on('menuItemCreated', (menuItem) => {
-      console.log('New menu item created:', menuItem);
-      io.of('/users').emit('menuItemCreated', menuItem);
+    socket.on('menuNotification', (notification) => {
+      console.log('Menu notification:', notification);
+      io.of('/users').emit('menuNotification', notification);
     });
   
     // Notify a specific user when their order is completed
-    socket.on('orderCompleted', ({ phoneNumber, orderId }) => {
+    socket.on('orderNotification', ({ phoneNumber, orderId, message }) => {
       const userSocketId = userSockets.get(phoneNumber);
       if (userSocketId) {
-        io.of('/users').to(userSocketId).emit('orderCompleted', {
+        io.of('/users').to(userSocketId).emit('orderNotification', {
           orderId,
-          message: `Your order #${orderId} has been completed!`,
+          message: `Your order #${orderId} has been ${message}`,
         });
         console.log(`Notified user ${phoneNumber} about order completion.`);
       }
     });
   
     // Notify all users of kitchen status updates
-    socket.on('kitchenStatusUpdated', (status) => {
+    socket.on('kitchenStatus', (status) => {
       console.log('Kitchen status updated:', status);
-      io.of('/users').emit('kitchenStatusUpdated', status);
+      io.of('/users').emit('kitchenStatus', status);
     });
   
     socket.on('disconnect', () => {

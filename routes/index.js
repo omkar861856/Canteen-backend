@@ -9,6 +9,7 @@ import authRoutes from './authRoutes.js'
 import swaggerUiExpress from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 import notificationRoutes from './notificationRoutes.js'
+import webPushRoutes from './webPushRoutes.js'
 
 const router = Router();
 
@@ -36,6 +37,7 @@ router.use('/razorpay', razorpayRoutes)
 router.use('/generalfeedback', generalFeedbackRoutes)
 router.use('/auth', authRoutes)  
 router.use('/notifications', notificationRoutes)
+router.use('/webpush', webPushRoutes)
 
 
 

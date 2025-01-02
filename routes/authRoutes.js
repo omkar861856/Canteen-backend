@@ -408,19 +408,23 @@ router.get("/kitchen-status/:kitchenId", async (req,res)=>{
 })
 
 // Backend route to handle login status
-router.post('/status', (req, res) => { 
-    const { phone } = req.body;
-
-    const user = User.find({phone})
-
-    // Check user status in database or session (mocked here)
-    const status = user.isLoggedIn;
-
-    if (status) {
-        return res.status(200).json({ isLoggedIn: status});
-    } else {
-        return res.status(404).json({ error: 'User not found' });
-    }
+router.get('/status/:phone', async(req, res) => { 
+   try {
+     const { phone } = req.params;
+ 
+     const user = await User.findOne({phone})
+  
+     // Check user status in database or session (mocked here) 
+     const status = user.isLoggedIn;
+ 
+     if (status) {
+         return res.status(200).json({ isLoggedIn: status});
+     } else {
+         return res.status(404).json({ error: 'User not found' });
+     }
+   } catch (error) {
+    res.status(500).send({message:"Internal server error"})
+   }
 });
 
 export default router;

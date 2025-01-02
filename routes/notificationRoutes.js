@@ -20,6 +20,7 @@ router.get('/vapi', function (req, res) {
     res.status(200).send({vapiPublicKey: vapidKeys.publicKey})
   })
 
+  
 
 
 export default router;
