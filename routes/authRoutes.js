@@ -38,6 +38,7 @@ const jwt_secret = process.env.JWT_SECRET;
 
 // Generate and send OTP
 router.post('/signin/send-otp', async (req, res) => {
+    console.log("signin attempt")
     const { phone } = req.body;
     try {
         const user = await User.findOne({ phone });
@@ -53,12 +54,9 @@ router.post('/signin/send-otp', async (req, res) => {
             
         }
         const token = user.token;
-        console.log('token', token)
-        jwt.verify(token, jwt_secret, async (err, decoded) => {
-            console.log(decoded, err)
+       jwt.verify(token, jwt_secret, async (err, decoded) => {
             if (err) {
                 try {
-                    console.error("Verification failed:", err.message);
                     //send otp further
                     const otp = Math.floor(100000 + Math.random() * 900000).toString();
                     const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
