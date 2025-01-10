@@ -10,51 +10,63 @@ const fast2sms_auth = process.env.FAST2SMS_AUTH;
 const jwt_secret = process.env.JWT_SECRET;
 
 
-router.post('/token-login', async (req, res)=>{
+router.post('/token-login', async (req, res) => {
+    const { token } = req.body;
 
-    const {token} = req.body;
-   
-    const {phone} = jwt.decode(token)
-    const user = await User.findOne({phone})
-
-    if(!user || !token){
-        return res.status(404).send({message:"User or token not available"})
+    // Check if token is null or undefined
+    if (!token) {
+        return res.status(400).send({ message: "Token is required" });
     }
 
- try {
-   
-       jwt.verify(token, jwt_secret, async (err, decoded) => {
-           if (err) {         
-               
-               return res.status(400).json({ message: 'Kindly generate OTP for new token' });
-   
-   
-           } else {
-               // login
-               user.isLoggedIn = true;
-               await user.save();
-               // Example using Express to set a secure cookie
-               res.cookie("session", token, {
-                   httpOnly: true,
-                   secure: true,
-                   sameSite: "Strict", // Prevent CSRF attacks
-                   maxAge: 3600000, // 1 hour
-               });
-               return res.status(200).json({ message: "Valid Token", user });
-           }
-       });
-
- } catch (error) {
-
-    return res.status(500).send({message:"Internal server error"})
+    let decoded;
     
- }
+    try {
+        // Decode the token to extract the phone number
+        decoded = jwt.decode(token);
+    } catch (err) {
+        return res.status(400).send({ message: "Invalid token format" });
+    }
 
+    // Check if decoded payload or phone is missing
+    if (!decoded || !decoded.phone) {
+        return res.status(400).send({ message: "Invalid token data" });
+    }
 
+    const { phone } = decoded;
 
+    // Check if user exists in the database
+    const user = await User.findOne({ phone });
+    if (!user) {
+        return res.status(404).send({ message: "User not found" });
+    }
 
-})
+    try {
+        // Verify the token
+        jwt.verify(token, jwt_secret, async (err) => {
+            if (err) {
+                // Token is invalid or expired
+                return res.status(400).json({ message: "Kindly generate OTP for a new token" });
+            }
 
+            // Token is valid, log the user in
+            user.isLoggedIn = true;
+            await user.save();
+
+            // Set a secure cookie with the token
+            res.cookie("session", token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "Strict", // Prevent CSRF attacks
+                maxAge: 3600000, // 1 hour
+            });
+
+            return res.status(200).json({ message: "Valid Token", user });
+        });
+    } catch (error) {
+        console.error("Error during token verification:", error);
+        return res.status(500).send({ message: "Internal server error" });
+    }
+});
 
 /**
  * @swagger
