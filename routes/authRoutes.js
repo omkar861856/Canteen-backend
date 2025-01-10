@@ -53,7 +53,9 @@ router.post('/signin/send-otp', async (req, res) => {
             
         }
         const token = user.token;
-        await jwt.verify(token, jwt_secret, async (err, decoded) => {
+        console.log('token', token)
+        jwt.verify(token, jwt_secret, async (err, decoded) => {
+            console.log(decoded, err)
             if (err) {
                 try {
                     console.error("Verification failed:", err.message);
@@ -77,15 +79,15 @@ router.post('/signin/send-otp', async (req, res) => {
                     return res.status(200).json({ message: 'OTP sent successfully!', user });
                 } catch (error) {
 
-                    console.log("Error", error)
-                    return res.status(500).send('Error during OTP generation or sending:')
+                    console.log("Error", error);
+                    return res.status(500).send('Error during OTP generation or sending:');
 
                 }
             } else {
                 // login
                 user.isLoggedIn = true;
-                await user.save()
-                return res.status(200).json({ message: "Valid Token", user })
+                await user.save();
+                return res.status(200).json({ message: "Valid Token", user });
             }
         });
     } catch (err) {

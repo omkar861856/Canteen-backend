@@ -1,5 +1,6 @@
 import Router from 'express'
 import Order from '../models/Order.js'
+import axios from 'axios';
 
 const router = Router();
 
@@ -51,6 +52,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({ message: "Order created successfully", orders });
   } catch (err) {
+    console.log(err)
     res.status(400).json({ error: err.message });
   }
 });
@@ -234,6 +236,41 @@ router.get('/:id', async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+// send order details to kitchen via sms
+
+router.post('/sms', async (req, res)=>{
+
+  console.log(req.body)
+
+   const {variable_values, number} = req.body;
+ 
+   const fast2smsAuth = process.env.FAST2SMS_AUTH;
+   const config = {
+    method: 'get',
+    url: 'https://www.fast2sms.com/dev/bulkV2',
+    params: {
+      authorization: fast2smsAuth,
+      route: 'dlt',
+      sender_id: 'ANGCAN',
+      message: '178219',
+      variables_values: variable_values,
+      flash: '0',
+      numbers: number,
+      schedule_time: ''
+    }
+  };
+  
+  try {
+    const response = await axios(config);
+    console.log('Response:', response.data);
+    res.status(200).send({message:response.data.message})
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send({message:"Internal server error"})
+  }
+
+})
 
 
 /**

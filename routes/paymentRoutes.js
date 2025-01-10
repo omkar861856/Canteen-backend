@@ -1,5 +1,6 @@
 import Router from 'express'
 import Payment from '../models/Payment.js';
+import { instance } from './razorpayRoutes.js';
 
 const router = Router();
 
@@ -25,9 +26,10 @@ const router = Router();
  *         description: Internal server error.
  */
 
-  router.get('/', async (req, res) => {
+  router.get('/:kitchenId', async (req, res) => {
+    const {kitchenId} = req.params;
     try {
-      const payments = await Payment.find();
+      const payments = await Payment.find({kitchenId});
       res.json(payments);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -117,6 +119,70 @@ const router = Router();
       res.status(500).json({ message: error.message });
     }
   });
+
+  // refund
+
+  router.post('/refund', async (req, res) => {
+    const { paymentId, refundAmount } = req.body;
+  
+    if (!paymentId) {
+      return res.status(400).json({ message: 'Payment ID is required.' });
+    }
+  
+    try {
+      // Step 1: Fetch the payment object from the database
+      const payment = await Payment.findOne({ id: paymentId });
+  
+      if (!payment) {
+        return res.status(404).json({ message: 'Payment not found.' });
+      }
+  
+      const availableRefund = payment.amount;
+  
+      // Validate refund amount
+      if (refundAmount > availableRefund) {
+        return res.status(400).json({
+          message: `Refund amount exceeds available balance. Maximum refundable: ₹${availableRefund / 100}.`,
+        });
+      }
+  
+      // Step 2: Send a refund request to Razorpay
+      const refundPayload = {
+        amount: refundAmount, // Refund amount in paise
+      };
+  
+      const razorpayRefund = await instance.payments.refund(paymentId, refundPayload);
+  
+      // Step 3: Update the payment in the database
+      const newAmountRefunded = payment.amount_refunded + refundAmount;
+  
+      const refund = {
+        id: razorpayRefund.id,
+        amount: razorpayRefund.amount,
+        created_at: razorpayRefund.created_at,
+        status: razorpayRefund.status,
+        notes: razorpayRefund.notes || [],
+      };
+  
+      payment.refunds.push(refund);
+      payment.amount_refunded = newAmountRefunded;
+      payment.refund_status = newAmountRefunded === payment.amount ? 'full' : 'partial';
+      payment.amount = payment.amount - refundAmount;
+  
+      await payment.save();
+  
+      // Step 4: Respond with the updated payment and refund details
+      res.status(200).json({
+        message: 'Refund created successfully.',
+        payment,
+        refund: razorpayRefund,
+      });
+    } catch (error) {
+      console.error('Error creating refund:', error);
+      res.status(500).json({ message: 'Internal server error.', error: error.message });
+    }
+  })
+  
   
 
   /**

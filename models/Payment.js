@@ -1,6 +1,14 @@
 // models/Payment.js
 import { Schema, model } from 'mongoose';
 
+const refundSchema = new Schema({
+  id: { type: String, required: true }, // Unique ID for the refund
+  amount: { type: Number, required: true }, // Amount refunded in paise
+  created_at: { type: Number, required: true }, // Timestamp of refund creation
+  status: { type: String, required: true }, // Refund status (e.g., 'processed')
+  notes: { type: [String], default: [] }, // Optional notes
+}, { _id: false }); // Prevents Mongoose from adding an _id field to each refund sub-document
+
 const paymentSchema = new Schema({
   id: { type: String, required: true },
   entity: { type: String, required: true },
@@ -11,8 +19,8 @@ const paymentSchema = new Schema({
   invoice_id: { type: String, default: null },
   international: { type: Boolean, required: true },
   method: { type: String, required: true },
-  amount_refunded: { type: Number, default: 0 },
-  refund_status: { type: String, default: null },
+  amount_refunded: { type: Number, default: 0 }, // Total refunded amount
+  refund_status: { type: String, default: null }, // 'partial', 'full', or null
   captured: { type: Boolean, required: true },
   description: { type: String, required: true },
   card_id: { type: String, default: null },
@@ -33,7 +41,8 @@ const paymentSchema = new Schema({
     bank_transaction_id: { type: String, required: true },
   },
   created_at: { type: Number, required: true },
-  kitchenId: {type: String, required: true}
-},{ collection: "Payments" });
+  kitchenId: { type: String, required: true },
+  refunds: { type: [refundSchema], default: [] }, // Array of refund sub-documents
+}, { collection: "Payments" });
 
 export default model('Payment', paymentSchema);

@@ -153,7 +153,7 @@ export const initializeSocket = (server) => {
     });
   });
   
-  io.of('/users').on('connection', (socket) => {
+  io.of('/users').on('connection', (socket) => {  
     console.log('User connected:', socket.id);
 
     // Store user's socket ID for targeted notifications
