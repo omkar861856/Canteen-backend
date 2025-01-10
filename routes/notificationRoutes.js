@@ -1,5 +1,4 @@
 import Router from 'express'
-import { vapidKeys } from '../socket/index.js';
 
 const router = Router();
 // routes

@@ -1,5 +1,4 @@
 import { Server } from 'socket.io';
-import { allowedOrigins } from '../app.js';
 
 import webPush from 'web-push'
 
@@ -10,6 +9,15 @@ export const webNotifications = webPush.setVapidDetails(
   `${vapidKeys.publicKey}`,
   `${vapidKeys.privateKey}`
 )
+
+const allowedOrigins = '*'
+
+// [
+//   'http://localhost:5173',            
+//   'http://localhost:5174',         
+//   'https://canteen-mauve.vercel.app', // Frontend hosted on Vercel
+//   'https://kitchen-alpha-liard.vercel.app', // Kitchen app URL
+// ];
 
 const userSockets = new Map(); // { userId: socketId }
 
