@@ -110,9 +110,7 @@ export const initializeSocket = (server) => {
   io.of('/kitchen').on('connection', (socket) => {
     console.log('Kitchen connected:', socket.id);
 
-      // Send a personalized message to the connected client
-      socket.emit('welcomeMessage', {message:`Hello kitchen ${socket.id}, welcome to the server!`});
-
+  
       // Listen for a new message sent by the kitchen
     socket.on('messageFromKitchen', (messageData) => {
 

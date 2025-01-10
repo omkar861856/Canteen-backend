@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema({
     isKitchen: {type: Boolean},
     kitchenId: {type: String},
     kitchenName: {type: String},
-    isKitchenOnline: {type: Boolean}
+    isKitchenOnline: {type: Boolean},
 }, { collection: "Users" });
 
 export const User = mongoose.model('User', UserSchema); 

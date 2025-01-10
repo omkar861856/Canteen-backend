@@ -9,6 +9,53 @@ const fast2sms_auth = process.env.FAST2SMS_AUTH;
 
 const jwt_secret = process.env.JWT_SECRET;
 
+//token login middleware
+
+router.post('/token-login', async (req, res)=>{
+
+    const {token} = req.body;
+   
+    const {phone} = jwt.decode(token)
+    const user = await User.findOne({phone})
+
+    if(!user || !token){
+        return res.status(404).send({message:"User or token not available"})
+    }
+
+ try {
+   
+       jwt.verify(token, jwt_secret, async (err, decoded) => {
+           if (err) {         
+               
+               return res.status(400).json({ message: 'Kindly generate OTP for new token' });
+   
+   
+           } else {
+               // login
+               user.isLoggedIn = true;
+               await user.save();
+               // Example using Express to set a secure cookie
+               res.cookie("session", token, {
+                   httpOnly: true,
+                   secure: true,
+                   sameSite: "Strict", // Prevent CSRF attacks
+                   maxAge: 3600000, // 1 hour
+               });
+               return res.status(200).json({ message: "Valid Token", user });
+           }
+       });
+
+ } catch (error) {
+
+    return res.status(500).send({message:"Internal server error"})
+    
+ }
+
+
+
+
+})
+
 
 /**
  * @swagger
@@ -38,23 +85,22 @@ const jwt_secret = process.env.JWT_SECRET;
 
 // Generate and send OTP
 router.post('/signin/send-otp', async (req, res) => {
-    console.log("signin attempt")
     const { phone } = req.body;
     try {
         const user = await User.findOne({ phone });
         if (!user) {
             return res.status(404).json({ message: 'No user found, kindly signup' });
         }
-        if(user.isLoggedIn){
-            return res.status(403).send({message:"User already has and active login"})
+        if (user.isLoggedIn) {
+            return res.status(403).send({ message: "User already has and active login" })
         }
-        if(!user.isRegistered){
+        if (!user.isRegistered) {
 
-           return res.status(409).send({message: "User registeration not complete"})
-            
+            return res.status(409).send({ message: "User registeration not complete" })
+
         }
         const token = user.token;
-       jwt.verify(token, jwt_secret, async (err, decoded) => {
+        jwt.verify(token, jwt_secret, async (err, decoded) => {
             if (err) {
                 try {
                     //send otp further
@@ -85,6 +131,13 @@ router.post('/signin/send-otp', async (req, res) => {
                 // login
                 user.isLoggedIn = true;
                 await user.save();
+                // Example using Express to set a secure cookie
+                res.cookie("session", token, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "Strict", // Prevent CSRF attacks
+                    maxAge: 3600000, // 1 hour
+                });
                 return res.status(200).json({ message: "Valid Token", user });
             }
         });
@@ -149,8 +202,8 @@ router.post('/signup/send-otp', async (req, res) => {
         isLoggedIn: false,
         otpExpiresAt,
         isRegistered: false,
-        isKitchen, 
-        kitchenId, 
+        isKitchen,
+        kitchenId,
         kitchenName,
         isKitchenOnline: false,
         connectedKitchen
@@ -206,11 +259,18 @@ router.post('/verify-otp', async (req, res) => {
         // Generate JWT
         const token = jwt.sign({ phone }, process.env.JWT_SECRET, { expiresIn: '1d' });
         user.token = token;
-        if(!user.isRegistered){
+        if (!user.isRegistered) {
             user.isRegistered = true;
         }
-        if(user.isRegistered){
+        if (user.isRegistered) {
             user.isLoggedIn = true;
+             // Example using Express to set a secure cookie
+             res.cookie("session", token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "Strict", // Prevent CSRF attacks
+                maxAge: 3600000, // 1 hour
+            });
         }
         await user.save()
         res.status(200).json({ token, user });
@@ -357,18 +417,18 @@ router.get('/user', (req, res) => {
  */
 
 // set kitchen status 
-router.post('/update-kitchen-status', async (req,res)=>{
+router.post('/update-kitchen-status', async (req, res) => {
     try {
-        const {kitchenId, status} = req.body;
+        const { kitchenId, status } = req.body;
         const user = await User.findOne({ kitchenId });
-        if(!user){
-            return res.status(404).send({message:"Kitchen not found"})
+        if (!user) {
+            return res.status(404).send({ message: "Kitchen not found" })
         }
         user.isKitchenOnline = status
         await user.save()
-        res.status(200).send({message: "Kitchen status updated", status: user.isKitchenOnline})
+        res.status(200).send({ message: "Kitchen status updated", status: user.isKitchenOnline })
     } catch (error) {
-        res.status(500).send({message: "Internal server error"}) 
+        res.status(500).send({ message: "Internal server error" })
     }
 })
 
@@ -394,37 +454,37 @@ router.post('/update-kitchen-status', async (req,res)=>{
 
 // get kitchen status 
 
-router.get("/kitchen-status/:kitchenId", async (req,res)=>{
+router.get("/kitchen-status/:kitchenId", async (req, res) => {
     try {
-        const {kitchenId} = req.params;
+        const { kitchenId } = req.params;
         const user = await User.findOne({ kitchenId });
-        if(!user){
-            return res.status(404).send({message:"User not found"})
+        if (!user) {
+            return res.status(404).send({ message: "User not found" })
         }
-        res.status(200).send({message: "Kitchen status updated", status: user.isKitchenOnline, kitchenNumber: user.phone, kitchenName: user.kitchenName})
+        res.status(200).send({ message: "Kitchen status updated", status: user.isKitchenOnline, kitchenNumber: user.phone, kitchenName: user.kitchenName })
     } catch (error) {
-        res.status(500).send({message: "Internal server error"})  
+        res.status(500).send({ message: "Internal server error" })
     }
 })
 
 // Backend route to handle login status
-router.get('/status/:phone', async(req, res) => { 
-   try {
-     const { phone } = req.params;
- 
-     const user = await User.findOne({phone})
-  
-     // Check user status in database or session (mocked here) 
-     const status = user.isLoggedIn;
- 
-     if (status) {
-         return res.status(200).json({ isLoggedIn: status});
-     } else {
-         return res.status(404).json({ error: 'User not found' });
-     }
-   } catch (error) {
-    res.status(500).send({message:"Internal server error"})
-   }
+router.get('/status/:phone', async (req, res) => {
+    try {
+        const { phone } = req.params;
+
+        const user = await User.findOne({ phone })
+
+        // Check user status in database or session (mocked here) 
+        const status = user.isLoggedIn;
+
+        if (status) {
+            return res.status(200).json({ isLoggedIn: status });
+        } else {
+            return res.status(404).json({ error: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).send({ message: "Internal server error" })
+    }
 });
 
 export default router;
