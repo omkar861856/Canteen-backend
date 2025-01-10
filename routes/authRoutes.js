@@ -9,7 +9,6 @@ const fast2sms_auth = process.env.FAST2SMS_AUTH;
 
 const jwt_secret = process.env.JWT_SECRET;
 
-//token login middleware
 
 router.post('/token-login', async (req, res)=>{
 

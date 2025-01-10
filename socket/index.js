@@ -1,4 +1,5 @@
 import { Server } from 'socket.io';
+import { allowedOrigins } from '../app.js';
 
 import webPush from 'web-push'
 
@@ -100,7 +101,7 @@ export const initializeSocket = (server) => {
 
   const io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: allowedOrigins,
       methods: ['GET', 'POST']
     },
     pingTimeout: 60000, // 60 seconds timeout
